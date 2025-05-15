@@ -67,6 +67,10 @@ namespace simplified_BP_tree_index
                 JsonIndexStructure json = JsonSerializer.Deserialize<JsonIndexStructure>(fullfile);
                 Console.WriteLine(json);
             };
+            
+            //Teste de escrita mais conciso
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            File.WriteAllText(Path.Combine(@"c:\temp\bptree", "index.json"), JsonSerializer.Serialize(test));
         }
         
         //Lê um arquivo inteiro e retorna uma lista de arrays de string onde cada elemento da lista é uma linha e cada item do array de strings é uma coluna.

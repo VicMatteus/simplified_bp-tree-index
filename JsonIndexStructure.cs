@@ -11,11 +11,6 @@ public class JsonIndexStructure
 
     public static JsonIndexStructure LoadIndexFromDisk(string indexPath)
     {
-        if (!File.Exists(indexPath) == false)
-        {
-            return new JsonIndexStructure();
-        }
-        
         using (StreamReader reader = new StreamReader(indexPath))
         {
             string fullFile = reader.ReadToEnd();
@@ -30,13 +25,6 @@ public class JsonIndexStructure
         
         //save the index on disk
         var options = new JsonSerializerOptions { WriteIndented = true };
-        // using (StreamWriter writer = new StreamWriter(indexPath))
-        // {
-        //     writer.WriteLine(JsonSerializer.Serialize(this));
-        //     writer.Flush();
-        // }
-        
-        //Testar pra ver se funfa
         File.WriteAllText(indexPath, JsonSerializer.Serialize(this));
     }
 }

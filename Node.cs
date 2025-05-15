@@ -6,14 +6,7 @@ public class Node
     public string Id {get; set;}
     public bool IsLeaf {get; set;}
     public List<int> Keys {get; set;}
-    public List<int> Children {get; set;}
-    public List<List<Reference>> RegistersReferences {get; set;}
+    public List<string> Children {get; set;} //they're strings caus they reference other nodes
+    public List<List<Reference>> RegistersReferences {get; set;} //only used for leaves
     public string NextLeaf {get; set;}
-
-
-    public Node LoadNode(String id)
-    {
-        //Loads the node from the disk
-        return new Node();
-    }
 }

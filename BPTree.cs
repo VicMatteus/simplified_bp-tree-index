@@ -45,9 +45,8 @@ public class BPTree
             //Busca nos dados pra ver se o valor existe e monta uma lista com as referencias
             using StreamReader reader = new StreamReader(DataFile);
             line = reader.ReadLine(); //Read the header
-            line = reader.ReadLine(); //Actual first line
             
-            while (line != null)
+            while ((line = reader.ReadLine()) != null)
             {
                 partLine = line.Split(';');
                 if (partLine[2] == key)
@@ -64,11 +63,17 @@ public class BPTree
             node.IsLeaf = true;
             node.Keys.Add(int.Parse(key));
             node.RegistersReferences.Add(referencies);
+
+            JsonIndexStructure indexStructure;
+            indexStructure = new JsonIndexStructure() //If the index file not exists, create a new one
+            {
+                root = node.Id,
+                order = Order
+            };
             
-            JsonIndexStructure indexStructure = JsonIndexStructure.LoadIndexFromDisk(IndexPath);
             indexStructure.SaveNode(node, IndexPath);
             
-            Root = key;
+            Root = node.Id;
             IsEmpty = false;
         }
         else
