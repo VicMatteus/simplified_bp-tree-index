@@ -53,24 +53,27 @@ namespace simplified_BP_tree_index
 
             
             //Teste de escrita de json
-            using (StreamWriter x = File.CreateText(Path.Combine(@"c:\temp\bptree", "index.json")))
-            {
-                x.WriteLine(JsonSerializer.Serialize(test));
-                // x.WriteLine("Teste de escrita 3");
-                // x.WriteLine("Teste de escrita 4");
-            }
-            //Teste de leitura do json
-            using (StreamReader reader = new StreamReader(Path.Combine(@"c:\temp\bptree", "index.json")))
-            {
-                string fullfile = reader.ReadToEnd();
-                Console.WriteLine(fullfile);
-                JsonIndexStructure json = JsonSerializer.Deserialize<JsonIndexStructure>(fullfile);
-                Console.WriteLine(json);
-            };
-            
-            //Teste de escrita mais conciso
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            File.WriteAllText(Path.Combine(@"c:\temp\bptree", "index.json"), JsonSerializer.Serialize(test));
+            // using (StreamWriter x = File.CreateText(Path.Combine(@"c:\temp\bptree", "index.json")))
+            // {
+            //     x.WriteLine(JsonSerializer.Serialize(test));
+            //     // x.WriteLine("Teste de escrita 3");
+            //     // x.WriteLine("Teste de escrita 4");
+            // }
+            // //Teste de leitura do json
+            // using (StreamReader reader = new StreamReader(Path.Combine(@"c:\temp\bptree", "index.json")))
+            // {
+            //     string fullfile = reader.ReadToEnd();
+            //     Console.WriteLine(fullfile);
+            //     JsonIndexStructure json = JsonSerializer.Deserialize<JsonIndexStructure>(fullfile);
+            //     Console.WriteLine(json);
+            // };
+            //
+            // //Teste de escrita mais conciso
+            // var options = new JsonSerializerOptions { WriteIndented = true };
+            // File.WriteAllText(Path.Combine(@"c:\temp\bptree", "index.json"), JsonSerializer.Serialize(test));
+
+            List<int> Keys = [1, 2, 3, 4];
+            Console.WriteLine(Keys.Contains(23));
         }
         
         //Lê um arquivo inteiro e retorna uma lista de arrays de string onde cada elemento da lista é uma linha e cada item do array de strings é uma coluna.
