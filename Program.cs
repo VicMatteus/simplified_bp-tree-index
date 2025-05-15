@@ -1,7 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using System;
+using System.Text.Json;
+using simplified_BP_tree_index;
 
-namespace MyApp
+namespace simplified_BP_tree_index
 {
     internal class Program
     {
@@ -10,6 +12,15 @@ namespace MyApp
             // List<string[]> fullFile = ReadFileToMemory("../../../vinhos.csv");
             // fullFile.RemoveAt(0);
             //fullFile.Sort(CompareHarvestYear); 
+            Register register = new Register()
+            {
+                Id = "1",
+                Label = "rotulo",
+                HarvestYear = "2020",
+                Type = "tipo 1"
+            };
+            
+            Console.WriteLine(register.ToJson());
         }
         
         //Lê um arquivo inteiro e retorna uma lista de arrays de string onde cada elemento da lista é uma linha e cada item do array de strings é uma coluna.
