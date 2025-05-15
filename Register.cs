@@ -11,15 +11,6 @@ public class Register
     public string HarvestYear { get; set; }
     public string Type { get; set; }
     
-
-    // public Register(string id, string label, string harvest_year, string type)
-    // {
-    //     this.Id = id;
-    //     this.Label = label;
-    //     this.HarvestYear = harvest_year;
-    //     this.Type = type;
-    // }
-
     public static Register FromCSV(string line)
     {
         string[] splittedLine = line.Split(";");
@@ -30,12 +21,6 @@ public class Register
              HarvestYear = splittedLine[2],
              Type = splittedLine[3]
         };
-        return register;
-    }
-
-    public override string ToString()
-    {
-        string register = "";
         return register;
     }
 

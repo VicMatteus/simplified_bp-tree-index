@@ -1,28 +1,40 @@
 ﻿namespace simplified_BP_tree_index;
-
 //Represents a command received from the in.txt
+
+public enum Operation
+{
+    INC,
+    BUS
+}
 public class Command
 {
-    public enum Operation
-    {
-        INC,
-        BUS
-    }
-
-    private Operation op { get; set; }
-    private string key { get; set; }
+    public Operation Op { get; set; }
+    public string Key { get; set; }
 
     public Command(Operation op, string key)
     {
-        this.op = op;
-        this.key = key;
+        this.Op = op;
+        this.Key = key;
     }
 
-    public Command FromString(string line)
+    public static Command FromString(string line)
     {
-        Operation opAux = line.Contains("BUS") ? Operation.BUS : Operation.INC;
+        Operation opAux;
+        
+        if (line.Contains("BUS"))
+        {
+            opAux = Operation.BUS;
+        }
+        else if (line.Contains("INC"))
+        {
+            opAux = Operation.INC;
+        }
+        else
+        {
+            throw new ArgumentException($"Comando inválido: linha {line}");
+        }
         string keyAux = line.Substring(line.IndexOf(":") + 1);
 
-        return new Command(op, key);
+        return new Command(opAux, keyAux);
     }
 }
