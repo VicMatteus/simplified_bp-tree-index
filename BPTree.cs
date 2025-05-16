@@ -13,17 +13,10 @@ public class BPTree
     public bool IsEmpty { get; set; } = true;
     public int NodeCount { get; set; } = 0;
 
-    public void CreateDirectory()
+    public void ValidateDataFile()
     {
-        try
-        {
-            Directory.CreateDirectory(dataDirectory);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("Erro na criação dos diretórios da árvore.");
-            throw;
-        }
+        if (!File.Exists(DataFile))
+            throw new FileNotFoundException("Arquivo de dados vinhos.csv não encontrado em " + DataFile);
     }
 
     private string GenerateNodeId()
@@ -32,36 +25,39 @@ public class BPTree
         return $"N{NodeCount.ToString()}";
     }
     
-    public void Insert(string key)
+    public string Insert(string key)
     {
+        int intKey = int.Parse(key);
         bool newRoot = false;
-        List<Reference> referencies = GetReferencesForKey(key);
-        if (referencies.Count == 0)
+        List<Reference> references = GetReferencesForKey(key);
+        if (references.Count == 0)
         {
-            //Escrever no out.txt INC:[key]/0, pois chave não existe nos dados. 
-            return;
+            //Escrever no out.txt INC:[key]/0, pois chave não existe nos dados.
+            Console.WriteLine($"INC:{key}/{references.Count()}");
+            return $"INC:{key}/{references.Count()}";
         }
         
         //Insert the key in the index file
         if (IsEmpty)
         {
             Node node = new Node();
-                          node.Id = GenerateNodeId();
-                          node.IsLeaf = true;
-                          node.Keys.Add(int.Parse(key));
-                          node.RegistersReferences.Add(referencies);
-              
-                          JsonIndexStructure indexStructure;
-                          indexStructure = new JsonIndexStructure() //If the index file not exists, create a new one
-                          {
-                              root = node.Id,
-                              order = Order
-                          };
+            node.Id = GenerateNodeId();
+            node.IsLeaf = true;
+            node.Keys.Add(intKey);
+            node.RegistersReferences.Add(references);
+
+            JsonIndexStructure indexStructure;
+            indexStructure = new JsonIndexStructure() //If the index file not exists, create a new one
+            {
+              root = node.Id,
+              order = Order
+            };
             
             indexStructure.SaveNode(node, IndexPath);
-            
             Root = node.Id;
             IsEmpty = false;
+            Console.WriteLine($"INC:{key}/{references.Count()}");
+            return $"INC:{key}/{references.Count()}";
         }
         else
         {
@@ -71,30 +67,34 @@ public class BPTree
             Node node = GetLeafNodeForKey(key);
             
             //se a chave já existe
-            if (node.Keys.Contains(int.Parse(key)))
+            if (node.Keys.Contains(intKey))
             {
                 //Como os dados são estáticos, não é necessário atualizar nada, apenas ignorar o comando.
                 //Escrever no out.txt INC:[key]/0, pois nada foi atualizado 
+                Console.WriteLine($"INC:{key}/0");
+                return $"INC:{key}/0";
             }
             else
             {
-                bool split = false;
+                bool didSplit = false;
                 Node newNode = null;
                 Node parentNode = null;
                 Node newRootNode = null;
+                string splittedNodeKey = "";
+                
                 JsonIndexStructure indexStructure = JsonIndexStructure.LoadIndexFromDisk(IndexPath);
                 
                 int insertIndex = 0;
-                while (insertIndex < node.Keys.Count && int.Parse(key) > node.Keys[insertIndex]) //enquanto chave de busca > chave atual, ando até achar uma maior(lugar certo)
+                while (insertIndex < node.Keys.Count && intKey > node.Keys[insertIndex]) //enquanto chave de busca > chave atual, ando até achar uma maior(lugar certo)
                 {
                     insertIndex++;
                 }
 
                 //Updates the key list, respecting the order
-                node.Keys.Insert(insertIndex, int.Parse(key));
+                node.Keys.Insert(insertIndex, intKey);
                 
                 //updates the references list, respecting the order
-                node.RegistersReferences.Insert(insertIndex, referencies);
+                node.RegistersReferences.Insert(insertIndex, references);
                 
                 
                 //Insiro eles ordenados primeiro, para depois trocar de nó, aproveitando a ordenação prévia
@@ -102,7 +102,7 @@ public class BPTree
                 {
                     //Será necessário criar um novo nó, colocar metade do nó anterior nele assim como suas referências
                     //primeiro: criar um novo nó
-                    split = true;
+                    didSplit = true;
                     newNode = new Node();
                     newNode.Id = GenerateNodeId();
                     newNode.IsLeaf = true;
@@ -110,6 +110,9 @@ public class BPTree
                     //Separar as chaves entre o nó antigo e o novo nó
                     decimal mid =  Math.Ceiling(Order / 2M);
 
+                    //Armazeno uma chave do nó base para encontrá-lo na busca pelo pai
+                    splittedNodeKey = node.Keys[0].ToString();
+                    
                     //Manipulando apenas node, pois newNode é auxiliar e ainda não entrou no índice
                     for (int i = (int) mid; i < node.Keys.Count; i++)
                     {
@@ -120,6 +123,9 @@ public class BPTree
                     //Removo itens do nó antigo
                     node.Keys.RemoveRange((int)mid, node.Keys.Count - (int)mid);
                     node.RegistersReferences.RemoveRange((int)mid, node.RegistersReferences.Count - (int)mid);
+                    
+                    //Finalizo o nó original pós split.
+                    indexStructure.SaveNode(node, IndexPath);;
                     
                     //Agora deve promover o menor elemento do nó novo à pai
                     int newParentKey = newNode.Keys[0];
@@ -135,40 +141,71 @@ public class BPTree
                         newRootNode.Children.Add(node.Id);
                         newRootNode.Children.Add(newNode.Id);
                         
+                        indexStructure.SaveNode(newRootNode, IndexPath);
                         Root = newRootNode.Id;
+                        indexStructure.order = Order;
                     }
                     else
                     {
                         //Identificar o pai e inserir nele o novo filho
-                        string parentNodeId = GetParentNodeId(newNode.Id);
-                        parentNode = indexStructure.Nodes[parentNodeId];
-                        parentNode.Children.Add(newParentKey.ToString());
+                        //Isso é carregar um novo nó, então "node" já foi salvo acima
+                        parentNode = GetParentNodeForKey(node.Id, splittedNodeKey);
+                        
+                        //Para manter a ordenação no pai:
+                        int parentInsertIndex = 0;
+                        while (parentInsertIndex < parentNode.Keys.Count && newParentKey > parentNode.Keys[parentInsertIndex])
+                        {
+                            parentInsertIndex++;
+                        }
+                        parentNode.Keys.Insert(parentInsertIndex, newParentKey);
+                        parentNode.Children.Insert(parentInsertIndex + 1, newNode.Id);
+                        
+                        //Salva o nó pai com um filho novo e nova chave
+                        indexStructure.SaveNode(parentNode, IndexPath);
                     }
 
                 }
-                //Save the nodes: node(old, splitted), newNode(newborn), parentNode(the new root or the original parent node)
-                indexStructure.SaveNode(node, IndexPath);;
-                if (split)
+                else
+                {
+                    indexStructure.SaveNode(node, IndexPath);;
+                }
+               
+                if (didSplit)
                 {
                     indexStructure.SaveNode(newNode, IndexPath);
-                    indexStructure.SaveNode(newRoot ? newRootNode : parentNode, IndexPath);;
-                };
-                //Escrever no out.txt INC:[key]/referencies.Count()
+                }
+                
+                //Escrever no out.txt $"INC:{key}/{references.Count()}"
+                Console.WriteLine($"INC:{key}/{references.Count()}");
+                return $"INC:{key}/{references.Count()}";
             }
         }
     }
     
-    public List<int> Search(string key)
+    public string Search(string key)
     {
-        //Look up for the key in the index file
+        int intKey = int.Parse(key);
+        
         if (IsEmpty)
         {
-            return new List<int>();
+            Console.WriteLine($"BUS=:{key}/0");
+            return $"BUS=:{key}/0";
+        }
+        
+        List<Reference> references = GetReferencesForKey(key);
+        if (references.Count == 0)
+        {
+            //Escrever no out.txt INC:[key]/0, pois chave não existe nos dados.
+            Console.WriteLine($"BUS=:{key}/{references.Count()}");
+            return $"BUS=:{key}/{references.Count()}";
         }
         else
         {
-            //Faz a busca nó a nó
-            return new List<int>();
+            //Carrega o nó após uma busca nó a nó
+            Node node = GetLeafNodeForKey(key);
+            //Procura no nó o índice da chave buscada. com o indice, vai na lista de referencias e conta quantas tem.
+            Console.WriteLine($"BUS=:{key}/{node.RegistersReferences[node.Keys.IndexOf(int.Parse(key))].Count.ToString()}");
+            return $"BUS=:{key}/{node.RegistersReferences[node.Keys.IndexOf(int.Parse(key))].Count.ToString()}";
         }
     }
 
@@ -190,61 +227,51 @@ public class BPTree
             {
                 i++;
             }
-
             nextNodeId = currentNode.Children[i]; //Esse é o próximo nó que precisa ser carregado.
             currentNode = indexStructure.Nodes[nextNodeId]; //Pega o próximo nó, garantindo apenas um nó manipulado por vez para chegar à folha.
         }
-
+        
         return currentNode;
     }
-    
-    //Revisar
-    public string? GetParentNodeId(string childNodeId)
+
+    public Node GetParentNodeForKey(string nodeId, string nodeKey)
     {
-        if (childNodeId == Root)
-            return null; // A raiz não tem pai
-
-        JsonIndexStructure index = JsonIndexStructure.LoadIndexFromDisk(IndexPath);
-        Node currentNode = index.Nodes[Root];
-
+        JsonIndexStructure indexStructure = JsonIndexStructure.LoadIndexFromDisk(IndexPath);
+        Node currentNode = indexStructure.Nodes[Root];
+        int intKey = int.Parse(nodeKey);
+        string nextNodeId = "";
+        List<string> parentsPath = new List<string>();
+        
         while (!currentNode.IsLeaf)
         {
-            foreach (string child in currentNode.Children)
-            {
-                if (child == childNodeId)
-                    return currentNode.Id; // Achou o pai
-            }
-
-            // Descobre o próximo filho que deve conter o nó desejado
-            // Aqui a gente assume que os nomes dos nós não carregam a ordem, então seguimos baseado nas chaves
             int i = 0;
-            while (i < currentNode.Keys.Count && CompareNodeId(childNodeId, currentNode.Children[i]) > 0)
+            while (i < currentNode.Keys.Count && intKey >= currentNode.Keys[i])
             {
                 i++;
             }
-
-            if (i >= currentNode.Children.Count)
-                i = currentNode.Children.Count - 1;
-
-            currentNode = index.Nodes[currentNode.Children[i]];
+            parentsPath.Add(currentNode.Id);
+            nextNodeId = currentNode.Children[i]; 
+            currentNode = indexStructure.Nodes[nextNodeId]; //Pega o próximo nó, garantindo apenas um nó manipulado por vez para chegar à folha.
         }
 
-        return null; // Se não encontrar (não era pra acontecer)
-    }
-    //Revisar
-    private int CompareNodeId(string a, string b)
-    {
-        int numA = int.Parse(new string(a.SkipWhile(c => !char.IsDigit(c)).ToArray()));
-        int numB = int.Parse(new string(b.SkipWhile(c => !char.IsDigit(c)).ToArray()));
-        return numA.CompareTo(numB);
+        foreach (string id in parentsPath)
+        {
+            if (id == nodeId)
+            {
+                return indexStructure.Nodes[id];
+            } 
+        }
+        throw new Exception($"Nó pai não encontrado para o nó {nodeId} com chave {nodeKey}");
+        return null;
     }
     
     public List<Reference> GetReferencesForKey(string key)
     {
+        ValidateDataFile();
         int lineOffset = 1;
         string line = "";
         string[] partLine;
-        List<Reference> referencies = new List<Reference>();
+        List<Reference> references = new List<Reference>();
         
         //Search the data looking for the key. if exists, adds the reference to the list.
         using StreamReader reader = new StreamReader(DataFile);
@@ -255,12 +282,11 @@ public class BPTree
             partLine = line.Split(';');
             if (partLine[2] == key)
             {
-                referencies.Add(new Reference(partLine[0], lineOffset));
+                references.Add(new Reference(partLine[0], lineOffset));
             }
             lineOffset++;
-            line = reader.ReadLine();
         }
 
-        return referencies;
+        return references;
     }
 }

@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Update="vinhos.csv">
+      <None Update="vinhosTest.csv">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

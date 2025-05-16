@@ -49,6 +49,7 @@ public class CommandProcessor
         else
         {
             //bptree deve buscar o valor na árvore
+            string result = _bpTree.Search(command.Key);
         }
     }
 }

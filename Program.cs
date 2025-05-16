@@ -74,6 +74,9 @@ namespace simplified_BP_tree_index
 
             List<int> Keys = [1, 2, 3, 4];
             Console.WriteLine(Keys.Contains(23));
+            
+            CommandProcessor cp = new CommandProcessor("../../../in.txt", "../../../out.txt");
+            cp.ExecuteAll();
         }
         
         //Lê um arquivo inteiro e retorna uma lista de arrays de string onde cada elemento da lista é uma linha e cada item do array de strings é uma coluna.
