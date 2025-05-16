@@ -11,6 +11,8 @@ namespace simplified_BP_tree_index
         {
             CommandProcessor commandProcessor = new CommandProcessor(@"C:\temp\bptree\in.txt", @"C:\temp\bptree\out.txt");
             commandProcessor.ExecuteAll();
+            Console.WriteLine("Pressione qualquer tecla para sair...");
+            Console.ReadKey();
         }
     }
 }

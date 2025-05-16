@@ -17,6 +17,9 @@ Após instanciado, basta usar o método ````ExecuteAll()````
 ```csharp
  commandProcecssor.ExecuteAll()
 ```
+Após a build do projeto o executável estará em: <br> 
+```pasta_do_projeto\bin\Debug\net9.0\simplified_BP-tree_index.exe```
+
 
 ## Funcionamento base:
 A classe Command Processor é responsável por processar o in.txt e passar os comandos para a BPTree. Esta, por sua vez, é 
