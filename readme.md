@@ -1,7 +1,11 @@
 ﻿## Objetivo: 
-Implementar uma estrutura de árvore B+ simplificada em C#, com persistência em disco. O índice será armazenado em um arquivo index.json, enquanto os registros completos residirão em um arquivo data.csv. A árvore suportará inserções e buscas exatas, simulando o funcionamento básico de um índice de SGBD, com foco em clareza didática e fidelidade conceitual à estrutura da B+ Tree.
+Implementar uma estrutura de árvore B+ simplificada em C#, com persistência em disco. 
+O índice será armazenado em um arquivo index.json, enquanto os registros completos residirão em um arquivo vinho.csv. 
+A árvore suportará inserções e buscas exatas, simulando o funcionamento básico de um índice de SGBD, com foco em clareza didática 
+e fidelidade conceitual à estrutura da B+ Tree.
 
 ## Como usar:
+Arquivo principal: ````Program.cs````
 Após configurar os caminhos, basta instanciar na main um objeto CommandProcessor, como já está exemplificado.
 
 ```csharp
