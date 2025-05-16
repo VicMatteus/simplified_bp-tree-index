@@ -204,6 +204,12 @@ public class BPTree
             //Carrega o nó após uma busca nó a nó
             Node node = GetLeafNodeForKey(key);
             //Procura no nó o índice da chave buscada. com o indice, vai na lista de referencias e conta quantas tem.
+            int refIndex = node.Keys.IndexOf(int.Parse(key));
+            if (refIndex == -1)
+            {
+                Console.WriteLine($"BUS=:{key}/0 -> pois o registro existe no banco mas não foi indexado com o comando INC.");
+                return $"BUS=:{key}/0";
+            }
             Console.WriteLine($"BUS=:{key}/{node.RegistersReferences[node.Keys.IndexOf(int.Parse(key))].Count.ToString()}");
             return $"BUS=:{key}/{node.RegistersReferences[node.Keys.IndexOf(int.Parse(key))].Count.ToString()}";
         }

@@ -5,6 +5,7 @@ public class CommandProcessor
     private string _inFile;
     private string _outFile;
     private BPTree _bpTree;
+    private string _result;
 
     public CommandProcessor(string inFile, string outFile)
     {
@@ -35,6 +36,8 @@ public class CommandProcessor
 
             line = reader.ReadLine();
         }
+        Console.WriteLine($"Resultados oficiais:\n {_result}");
+        File.WriteAllText(_outFile, _result);
     }
 
     public void ExecuteNext(string line)
@@ -44,12 +47,12 @@ public class CommandProcessor
         if (command.Op == Operation.INC)
         {
             //bptree deve incluir o valor na árvore
-            _bpTree.Insert(command.Key);
+            _result += _bpTree.Insert(command.Key) + "\n";
         }
         else
         {
             //bptree deve buscar o valor na árvore
-            string result = _bpTree.Search(command.Key);
+            _result += _bpTree.Search(command.Key) + "\n";
         }
     }
 }
